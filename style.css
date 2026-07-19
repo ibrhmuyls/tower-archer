@@ -1,0 +1,252 @@
+/* Tower Archer - Styles */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;600;700&display=swap');
+
+:root {
+  --bg: #0b0f14;
+  --panel: #131a24;
+  --panel-2: #1a2330;
+  --accent: #f5a623;
+  --accent-2: #ff6b35;
+  --text: #e6ecf3;
+  --muted: #8a96a3;
+  --danger: #ff3b30;
+  --success: #34c759;
+  --warning: #ffcc02;
+  --glass: rgba(19, 26, 36, 0.75);
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: radial-gradient(circle at top left, #0f1623, #05070a);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  overflow: hidden;
+}
+
+#app { height: 100vh; display: flex; flex-direction: column; }
+
+/* Wallet Bar */
+#wallet-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px; background: var(--panel); border-bottom: 1px solid #1f2b3a;
+  flex-wrap: wrap; gap: 8px;
+}
+.wallet-left, .wallet-center, .wallet-right {
+  display: flex; align-items: center; gap: 10px;
+}
+.wallet-info { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.network-badge {
+  font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px;
+}
+.network-badge.testnet {
+  background: linear-gradient(135deg, #6ee7b7, #3b82f6);
+  color: #051b2c;
+}
+.wallet-badge-warning {
+  background: linear-gradient(135deg, #ffcc02, #ff9f0a);
+  color: #2e1a00;
+}
+.wallet-address { font-family: monospace; color: var(--muted); font-size: 12px; }
+.wallet-balance-label { color: var(--muted); font-weight: 600; font-size: 13px; }
+.wallet-balance-value { font-weight: 700; color: var(--warning); font-family: monospace; }
+.wallet-connected-text { color: #34c759; }
+.wallet-disconnected-text { color: #ff3b30; }
+.wallet-status-text { font-family: monospace; font-size: 12px; font-weight: 700; }
+
+/* Buttons */
+.btn {
+  border: none; padding: 10px 14px; border-radius: 10px;
+  font-weight: 700; color: #fff; cursor: pointer; background: #243044;
+  transition: transform .05s ease, filter .2s ease;
+}
+.btn:hover { filter: brightness(1.15); }
+.btn:active { transform: scale(0.97); }
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  box-shadow: 0 4px 12px rgba(245,166,35,0.35);
+}
+.btn-secondary { background: #2f3c51; }
+.btn-large { padding: 14px 22px; font-size: 16px; }
+.btn-small { padding: 6px 10px; font-size: 12px; }
+.btn-upgrade {
+  background: linear-gradient(135deg, #1f2b3d, #142236);
+  border: 1px solid #2f3c56;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  cursor: pointer;
+  position: relative;
+}
+.btn-upgrade:disabled { opacity: 0.45; cursor: not-allowed; filter: none; }
+.btn-upgrade .upgrade-tooltip {
+  opacity: 0; position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%);
+  background: #000; color: #fff; padding: 4px 8px; border-radius: 6px; font-size: 11px;
+  white-space: nowrap; pointer-events: none; transition: opacity .2s;
+}
+.btn-upgrade:hover .upgrade-tooltip { opacity: 1; }
+.btn-special {
+  background: linear-gradient(135deg, #ff3b30, #c0392b);
+  box-shadow: 0 4px 12px rgba(255,59,48,0.35);
+}
+.btn-energy { background: linear-gradient(135deg, #3b82f6, #06b6d4); }
+.btn-level { background: linear-gradient(135deg, #6366f1, #a855f7); }
+.btn-warn { background: linear-gradient(135deg, #f59e0b, #ef4444); }
+
+/* Difficulty Buttons */
+.difficulty-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  margin: 16px 0;
+}
+.diff-btn {
+  background: linear-gradient(135deg, #243044, #1b2737);
+  border: 1px solid #2f3c56; border-radius: 14px;
+  padding: 16px; color: #fff; cursor: pointer;
+  transition: transform .05s ease, filter .2s ease;
+}
+.diff-btn:hover { filter: brightness(1.2); transform: translateY(-1px); }
+.diff-name { font-weight: 700; font-size: 15px; }
+.diff-desc { color: var(--muted); font-size: 12px; margin-top: 4px; }
+
+/* Screens */
+.screen {
+  display: none; flex: 1; align-items: center; justify-content: center;
+}
+.screen.active { display: flex; }
+.screen-content {
+  background: var(--glass);
+  backdrop-filter: blur(8px);
+  border: 1px solid #1f2b3a;
+  border-radius: 16px; padding: 32px; max-width: 720px; width: 92%;
+  text-align: center;
+}
+.game-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 32px; margin: 0 0 8px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.game-subtitle { color: var(--muted); margin: 0 0 22px; }
+.start-controls, .stage-complete-actions, .gameover-actions {
+  display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
+}
+.upgrades-preview { margin-top: 24px; }
+.upgrade-items { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+.upgrade-item {
+  background: var(--panel-2); border: 1px solid #2f3c56;
+  padding: 10px 14px; border-radius: 12px; text-align: center;
+}
+.upgrade-icon { display: block; font-size: 22px; }
+.upgrade-name { display: block; font-size: 12px; color: var(--muted); }
+.upgrade-cost { display: block; font-weight: 700; color: var(--warning); font-size: 13px; }
+
+/* How to Play */
+.instructions { display: flex; flex-direction: column; gap: 12px; text-align: left; }
+.instruction-item {
+  display: flex; align-items: center; justify-content: flex-start;
+  gap: 12px; background: var(--panel-2); padding: 10px 14px;
+  border-radius: 10px; border: 1px solid #2f3c56; text-align: left;
+}
+.instruction-icon { font-size: 20px; }
+.instruction-text { font-size: 14px; color: var(--text); }
+
+/* Level Select */
+.level-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+.level-card {
+  background: linear-gradient(135deg, #243044, #1b2737);
+  border: 1px solid #2f3c56; border-radius: 14px; padding: 14px;
+  color: #fff; cursor: pointer; text-align: left;
+}
+.level-card:hover { filter: brightness(1.15); }
+.level-title { font-weight: 700; }
+.level-meta { color: var(--muted); font-size: 12px; margin-top: 4px; }
+
+/* HUD */
+#game-hud {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 12px; background: var(--panel); border-bottom: 1px solid #1f2b3a;
+}
+.hud-left, .hud-right { display: flex; gap: 16px; align-items: center; }
+.hud-center { flex: 1; display: flex; justify-content: center; }
+.hud-item { display: flex; flex-direction: column; align-items: center; }
+.hud-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+.hud-value { font-weight: 700; font-size: 16px; }
+.timer-container { display: flex; align-items: center; gap: 10px; }
+.timer-bar { width: 180px; height: 10px; background: #1c2633; border-radius: 999px; overflow: hidden; border: 1px solid #2f3c56; }
+.timer-fill { height: 100%; background: linear-gradient(90deg, #34c759, #a3e635); width: 100%; transition: width .4s linear; }
+.timer-warning { background: linear-gradient(90deg, #ffcc02, #ff9f0a); }
+.timer-danger { background: linear-gradient(90deg, #ff3b30, #d92525); }
+.timer-text { font-family: monospace; font-size: 16px; color: var(--text); }
+.speed-control { display: flex; align-items: center; gap: 6px; }
+.speed-label { font-size: 11px; color: var(--muted); }
+.gpu-meter { display: flex; align-items: center; gap: 6px; }
+.gpu-bar { width: 80px; height: 8px; background: #1c2633; border-radius: 999px; overflow: hidden; border: 1px solid #2f3c56; }
+.gpu-fill { height: 100%; background: linear-gradient(90deg, #34c759, #a3e635); width: 100%; transition: width .4s linear; }
+
+/* Play area */
+#game-screen { flex-direction: column; background: #05070a; }
+#game-container { flex: 1; position: relative; overflow: hidden; }
+#game-canvas { display: block; width: 100%; height: 100%; }
+#game-controls {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 12px; background: var(--panel); border-top: 1px solid #1f2b3a;
+  gap: 8px;
+}
+.control-group { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.control-group h4 { margin: 0 8px 0 0; color: var(--muted); font-size: 12px; }
+.upgrade-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* Overlays */
+.overlay {
+  position: absolute; inset: 0; z-index: 20;
+  background: rgba(5,7,10,0.65);
+  backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+}
+.overlay-content {
+  background: var(--panel); border: 1px solid #2f3c56;
+  padding: 28px; border-radius: 14px; display: flex;
+  flex-direction: column; gap: 12px; align-items: center;
+}
+.hidden { display: none !important; }
+
+/* Result screens */
+.result-title { font-size: 28px; color: var(--accent); }
+.result-title.gameover { color: var(--danger); }
+.result-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 18px 0; width: 100%; }
+.stat-item {
+  background: var(--panel-2); border: 1px solid #2f3c56;
+  padding: 12px; border-radius: 10px; display: flex; flex-direction: column;
+}
+.stat-label { font-size: 12px; color: var(--muted); }
+.stat-value { font-weight: 700; font-size: 18px; color: var(--accent); }
+
+/* Notification */
+.notification {
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+  background: var(--panel); border: 1px solid var(--accent);
+  padding: 10px 18px; border-radius: 999px;
+  color: var(--accent); font-weight: 700; font-size: 14px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+  z-index: 50;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .game-title { font-size: 22px; }
+  #game-hud { flex-wrap: wrap; gap: 8px; }
+  .timer-bar { width: 120px; }
+  .screen-content { padding: 20px; }
+  #wallet-bar { justify-content: center; }
+}
+
+/* Wallet Picker */
+.wallet-list { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 320px; }
+.wallet-option {
+  background: linear-gradient(135deg, #243044, #1b2737);
+  border: 1px solid #2f3c56; border-radius: 12px;
+  padding: 12px 14px; color: #fff; cursor: pointer;
+  text-align: left; font-weight: 600;
+}
+.wallet-option:hover { filter: brightness(1.2); }
+.wallet-option .wo-name { font-size: 14px; }
+.wallet-option .wo-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }

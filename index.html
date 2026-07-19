@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tower Archer - Arc Testnet</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Wallet Connection Bar -->
+        <div id="wallet-bar">
+            <div class="wallet-info">
+                <span class="network-badge testnet">Arc Testnet</span>
+                <span id="wallet-address" class="wallet-address">Not Connected</span>
+            </div>
+            <div class="wallet-balance">
+                <span class="balance-label">USDC:</span>
+                <span id="usdc-balance" class="balance-value">0.00</span>
+            </div>
+            <button id="connect-wallet-btn" class="btn btn-primary">Connect Wallet</button>
+        </div>
+
+        <!-- Wallet Picker Modal -->
+        <div id="wallet-picker" class="overlay hidden">
+            <div class="overlay-content">
+                <h2>Select Wallet</h2>
+                <div id="wallet-list" class="wallet-list"></div>
+                <button id="wallet-picker-close" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+
+        <!-- Start Screen -->
+        <div id="start-screen" class="screen active">
+            <div class="screen-content">
+                <h1 class="game-title">Tower Archer</h1>
+                <p class="game-subtitle">Defend the Arc Testnet Tower</p>
+                <div class="start-controls">
+                    <button id="start-game-btn" class="btn btn-large btn-primary">Start Game</button>
+                    <button id="how-to-play-btn" class="btn btn-large btn-secondary">How to Play</button>
+                </div>
+                <div class="upgrades-preview">
+                    <h3>Available Upgrades</h3>
+                    <div class="upgrade-items">
+                        <div class="upgrade-item">
+                            <span class="upgrade-icon">🎯</span>
+                            <span class="upgrade-name">Faster Bow</span>
+                            <span class="upgrade-cost">5 USDC</span>
+                        </div>
+                        <div class="upgrade-item">
+                            <span class="upgrade-icon">⚡</span>
+                            <span class="upgrade-name">Power Arrows</span>
+                            <span class="upgrade-cost">10 USDC</span>
+                        </div>
+                        <div class="upgrade-item">
+                            <span class="upgrade-icon">🔥</span>
+                            <span class="upgrade-name">Fire Arrows</span>
+                            <span class="upgrade-cost">15 USDC</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- How To Play Screen -->
+        <div id="how-to-play-screen" class="screen">
+            <div class="screen-content">
+                <h2>How to Play</h2>
+                <div class="instructions">
+                    <div class="instruction-item">
+                        <span class="instruction-icon">🏹</span>
+                        <span class="instruction-text">Move mouse to aim, click to shoot arrows</span>
+                    </div>
+                    <div class="instruction-item">
+                        <span class="instruction-icon">👾</span>
+                        <span class="instruction-text">Enemies approach from the right side</span>
+                    </div>
+                    <div class="instruction-item">
+                        <span class="instruction-icon">🏰</span>
+                        <span class="instruction-text">Protect your tower! Destroy enemies before they reach it</span>
+                    </div>
+                    <div class="instruction-item">
+                        <span class="instruction-icon">💰</span>
+                        <span class="instruction-text">Spend Arc Testnet USDC to upgrade your bow</span>
+                    </div>
+                    <div class="instruction-item">
+                        <span class="instruction-icon">⏱️</span>
+                        <span class="instruction-text">Complete waves before the stage timer runs out</span>
+                    </div>
+                </div>
+                <button id="back-from-howto-btn" class="btn btn-secondary">Back</button>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen" class="screen">
+            <div id="game-hud">
+                <div class="hud-left">
+                    <div class="hud-item">
+                        <span class="hud-label">Stage</span>
+                        <span id="stage-number" class="hud-value">1</span>
+                    </div>
+                    <div class="hud-item">
+                        <span class="hud-label">Wave</span>
+                        <span id="wave-number" class="hud-value">1</span>
+                    </div>
+                    <div class="hud-item">
+                        <span class="hud-label">Score</span>
+                        <span id="score-value" class="hud-value">0</span>
+                    </div>
+                </div>
+                <div class="hud-center">
+                    <div class="timer-container">
+                        <div class="timer-bar">
+                            <div id="timer-fill" class="timer-fill"></div>
+                        </div>
+                        <span id="timer-text" class="timer-text">0:00</span>
+                    </div>
+                </div>
+                <div class="hud-right">
+                    <div class="hud-item">
+                        <span class="hud-label">Lives</span>
+                        <span id="lives-value" class="hud-value">❤️ 5</span>
+                    </div>
+                    <div class="speed-control">
+                        <button id="speed-btn" class="btn btn-small">1x</button>
+                        <span class="speed-label">Speed</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="game-container">
+                <canvas id="game-canvas"></canvas>
+            </div>
+
+            <div id="game-controls">
+                <div class="control-group">
+                    <h4>Bow Upgrades</h4>
+                    <div class="upgrade-buttons">
+                        <button id="upgrade-speed-btn" class="btn btn-upgrade" data-cost="5" data-type="speed">
+                            <span class="upgrade-icon">🎯</span>
+                            <span class="upgrade-name">Faster Bow</span>
+                            <span class="upgrade-cost">5 USDC</span>
+                        </button>
+                        <button id="upgrade-power-btn" class="btn btn-upgrade" data-cost="10" data-type="power">
+                            <span class="upgrade-icon">⚡</span>
+                            <span class="upgrade-name">Power Arrows</span>
+                            <span class="upgrade-cost">10 USDC</span>
+                        </button>
+                        <button id="upgrade-pierce-btn" class="btn btn-upgrade" data-cost="12" data-type="pierce">
+                            <span class="upgrade-icon">🗡️</span>
+                            <span class="upgrade-name">Piercing Arrow</span>
+                            <span class="upgrade-cost">12 USDC</span>
+                        </button>
+                        <button id="upgrade-multi-btn" class="btn btn-upgrade" data-cost="15" data-type="multi">
+                            <span class="upgrade-icon">🔥</span>
+                            <span class="upgrade-name">Fire Arrows</span>
+                            <span class="upgrade-cost">15 USDC</span>
+                        </button>
+                        <button id="upgrade-extra-arrow-btn" class="btn btn-upgrade" data-cost="8" data-type="extra_arrow">
+                            <span class="upgrade-icon">➡️</span>
+                            <span class="upgrade-name">Extra Arrow</span>
+                            <span class="upgrade-cost">8 USDC</span>
+                        </button>
+                        <button id="upgrade-energy-btn" class="btn btn-upgrade" data-cost="20" data-type="energy">
+                            <span class="upgrade-icon">⚙️</span>
+                            <span class="upgrade-name">Energy Charge</span>
+                            <span class="upgrade-cost">20 USDC</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <button id="pause-btn" class="btn btn-secondary">Pause</button>
+                    <button id="give-life-btn" class="btn btn-special" data-cost="8">
+                        <span class="upgrade-icon">💖</span>
+                        <span class="upgrade-name">Extra Life</span>
+                        <span class="upgrade-cost">8 USDC</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pause Overlay -->
+        <div id="pause-overlay" class="overlay hidden">
+            <div class="overlay-content">
+                <h2>Paused</h2>
+                <button id="resume-btn" class="btn btn-primary">Resume</button>
+                <button id="quit-btn" class="btn btn-secondary">Quit to Menu</button>
+            </div>
+        </div>
+
+        <!-- Stage Complete Screen -->
+        <div id="stage-complete-screen" class="screen">
+            <div class="screen-content">
+                <h2 class="result-title" id="stage-complete-title">Stage Complete!</h2>
+                <div class="result-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Score</span>
+                        <span id="final-score" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Enemies Defeated</span>
+                        <span id="enemies-defeated" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Time Bonus</span>
+                        <span id="time-bonus" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Stage</span>
+                        <span id="completed-stage" class="stat-value">1</span>
+                    </div>
+                </div>
+                <div class="stage-complete-actions">
+                    <button id="next-stage-btn" class="btn btn-large btn-primary">Next Stage</button>
+                    <button id="menu-btn" class="btn btn-large btn-secondary">Main Menu</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="gameover-screen" class="screen">
+            <div class="screen-content">
+                <h2 class="result-title gameover">Game Over</h2>
+                <div class="result-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Final Score</span>
+                        <span id="gameover-score" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Stage Reached</span>
+                        <span id="gameover-stage" class="stat-value">1</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Enemies Defeated</span>
+                        <span id="gameover-enemies" class="stat-value">0</span>
+                    </div>
+                </div>
+                <div class="gameover-actions">
+                    <button id="retry-btn" class="btn btn-large btn-primary">Retry</button>
+                    <button id="menu-from-gameover-btn" class="btn btn-large btn-secondary">Main Menu</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notification -->
+        <div id="notification" class="notification hidden">
+            <span id="notification-text"></span>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="wallet.js"></script>
+    <script src="ui.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
