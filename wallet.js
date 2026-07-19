@@ -94,7 +94,30 @@ async function connectWallet(walletIndex = 0) {
 }
 
 async function updateUSDCBalance(provider) {
-    if (!provider || !WALLET_STATE.connected) return;
+    if (!provider || !WALLET_STATE.connected || !WALLET_STATE.address) return;
+    
+    const addr = WALLET_STATE.address;
+    if (typeof addr === 'string' && addr.startsWith('0x')) {
+        try {
+            const baseUrl = (typeof ARC_CONFIG !== 'undefined' && ARC_CONFIG.backend?.baseUrl) ? ARC_CONFIG.backend.baseUrl : 'http://localhost:3001';
+            const backendRes = await fetch(`${baseUrl}/api/sync`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ address: addr })
+            });
+            if (backendRes.ok) {
+                const backendData = await backendRes.json();
+                if (backendData && typeof backendData.available === 'number') {
+                    WALLET_STATE.usdcBalance = Math.max(0, backendData.available);
+                    updateWalletUI();
+                    return;
+                }
+            }
+        } catch (err) {
+            console.error('Backend sync failed:', err);
+        }
+    }
+    
     try {
         const code = await provider.request({
             method: 'eth_getCode',

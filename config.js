@@ -12,8 +12,12 @@ window.ARC_CONFIG = {
     blockExplorerUrls: ['https://testnet.arcscan.app'],
     contracts: {
         usdc: '0x3600000000000000000000000000000000000000',
-        // Bridge / Mint hook if we later add on-chain spend
-        treasury: null
+        treasury: '0x0000000000000000000000000000000000000000'
+    },
+    backend: {
+        baseUrl: 'http://localhost:3001',
+        upgradeEndpoint: '/api/upgrade',
+        balanceEndpoint: '/api/balance'
     },
     // Gameplay constants
     gameplay: {

@@ -591,9 +591,12 @@ class TowerArcherGame {
         if (WALLET_STATE.usdcBalance < cost) {
             return false;
         }
+
+        this.recordUpgradeOnBackend(type, currentLevel + 1, cost);
+
         WALLET_STATE.usdcBalance -= cost;
         this.upgrades[type] = currentLevel + 1;
-        
+
         switch (upg.effect) {
             case 'fireRate': this.fireRate += upg.value; break;
             case 'damage': this.damage += upg.value; break;
@@ -607,10 +610,39 @@ class TowerArcherGame {
                 this.energy = Math.min(this.energy + 1, this.maxEnergy);
                 break;
         }
-        
+
+        if (WALLET_STATE.provider) {
+            updateUSDCBalance(WALLET_STATE.provider);
+        }
+
         updateWalletUI();
         this.updateUpgradeButtons();
         return true;
+    }
+
+    async recordUpgradeOnBackend(type, level, cost) {
+        if (!WALLET_STATE.address) return;
+
+        const baseUrl = (typeof ARC_CONFIG !== 'undefined' && ARC_CONFIG.backend?.baseUrl) ? ARC_CONFIG.backend.baseUrl : 'http://localhost:3001';
+
+        try {
+            const response = await fetch(`${baseUrl}/api/upgrade`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    address: WALLET_STATE.address,
+                    upgradeType: type,
+                    level: level,
+                    cost: cost
+                })
+            });
+
+            if (response.ok) {
+                console.log(`[BACKEND] Recorded upgrade: ${type} lvl${level} -${cost} USDC`);
+            }
+        } catch (err) {
+            console.error('Failed to record upgrade on backend:', err);
+        }
     }
 
     updateUpgradeButtons() {
