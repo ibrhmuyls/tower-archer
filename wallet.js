@@ -78,9 +78,45 @@ async function connectWallet(walletIndex = 0) {
         WALLET_STATE.connected = true;
         WALLET_STATE.address = address;
         WALLET_STATE.provider = targetProvider;
+        
+        // Switch to Arc Testnet after connection
+        const currentChainId = await targetProvider.request({ method: 'eth_chainId' }).catch(() => null);
+        const targetChainId = (typeof ARC_CONFIG !== 'undefined' && ARC_CONFIG.chainId) ? ARC_CONFIG.chainId : '0x4D024E2';
+        
+        if (currentChainId && currentChainId.toLowerCase() !== targetChainId.toLowerCase()) {
+            try {
+                await targetProvider.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: targetChainId }],
+                });
+            } catch (switchError) {
+                const code = switchError?.code;
+                if (code === 4902 || code === -32603) {
+                    const rpcUrls = (typeof ARC_CONFIG !== 'undefined' && ARC_CONFIG.rpcUrls && ARC_CONFIG.rpcUrls[0]) ? ARC_CONFIG.rpcUrls : ['https://rpc.testnet.arc.network'];
+                    await targetProvider.request({
+                        method: 'wallet_addEthereumChain',
+                        params: [{
+                            chainId: targetChainId,
+                            chainName: (typeof ARC_CONFIG !== 'undefined' && ARC_CONFIG.chainName) ? ARC_CONFIG.chainName : 'Arc Testnet',
+                            rpcUrls,
+                            nativeCurrency: { name: 'USDC', symbol: 'USDC', decimals: 6 },
+                            blockExplorerUrls: (typeof ARC_CONFIG !== 'undefined' && ARC_CONFIG.blockExplorerUrls && ARC_CONFIG.blockExplorerUrls[0]) ? ARC_CONFIG.blockExplorerUrls : ['https://testnet.arcscan.app'],
+                        }],
+                    });
+                } else {
+                    throw switchError;
+                }
+            }
+        }
+        
         updateWalletUI();
         window.ui?.showNotification('Cüzdan bağlandı: ' + address.slice(0, 6) + '...' + address.slice(-4));
         if (window.game) window.game.updateUpgradeButtons();
+        
+        // Refresh balance after chain is set
+        if (typeof updateUSDCBalance === 'function') {
+            updateUSDCBalance(targetProvider);
+        }
     } catch (err) {
         console.error('Wallet connection failed:', err);
         if (err?.code === 4001) {
@@ -88,7 +124,7 @@ async function connectWallet(walletIndex = 0) {
         } else if (err?.message?.toLowerCase().includes('user rejected')) {
             window.ui?.showNotification('Bağlantı reddedildi', 3000);
         } else {
-            window.ui?.showNotification('Cüzdan bağlantısı başarısız', 4000);
+            window.ui?.showNotification('Cüzdan bağlantısı başarısız: ' + (err?.message || 'bilinmeyen hata'), 4000);
         }
     }
 }
