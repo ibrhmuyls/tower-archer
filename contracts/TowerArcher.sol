@@ -99,7 +99,8 @@ contract TowerArcher is Ownable, ReentrancyGuard, Pausable {
         uint256 energyAmount
     ) external nonReentrant whenNotPaused {
         address player = msg.sender;
-        _validatePurchase(player);
+        require(player != address(0), "Invalid player");
+        require(block.timestamp >= players[player].lastPurchaseTimestamp + COOLDOWN_PER_PURCHASE, "Cooldown active");
         
         PlayerState storage state = players[player];
         uint256 totalCost = 0;
@@ -107,10 +108,15 @@ contract TowerArcher is Ownable, ReentrancyGuard, Pausable {
         
         if (upgradeIndex < 6) {
             uint256 currentLevel = (state.upgradeLevels >> (upgradeIndex * 4)) & 0xF;
+            require(currentLevel < upgrades[upgradeIndex].maxLevel, "Max level reached");
             uint256 cost = _getUpgradeCost(upgradeIndex, currentLevel);
+            require(cost > 0, "Invalid cost");
             totalCost += cost;
             newLevel = currentLevel + 1;
         }
+        
+        require(extraLivesAmount <= 5, "Too many lives");
+        require(energyAmount <= 5, "Too much energy");
         
         totalCost += extraLivesAmount * 8e5;
         totalCost += energyAmount * 20e5;
@@ -122,7 +128,6 @@ contract TowerArcher is Ownable, ReentrancyGuard, Pausable {
         if (upgradeIndex < 6) {
             uint256 currentLevel = (state.upgradeLevels >> (upgradeIndex * 4)) & 0xF;
             require(currentLevel < upgrades[upgradeIndex].maxLevel, "Max level reached");
-            
             state.upgradeLevels += (currentLevel + 1) << (upgradeIndex * 4);
             emit UpgradePurchased(player, upgradeIndex, currentLevel + 1, totalCost);
         }

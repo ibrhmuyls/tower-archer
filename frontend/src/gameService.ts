@@ -29,63 +29,105 @@ class GameService {
   }
 
   async purchaseUpgrade(upgradeIndex: number, currentLevel: number): Promise<PurchaseResult> {
-    if (!this.wallet) {
-      return { success: false, error: 'Wallet not connected' };
-    }
+      if (!this.wallet) {
+          return { success: false, error: 'Wallet not connected' };
+      }
 
-    this.txStatus = 'pending';
-    return purchaseOnChain(
-      this.wallet.provider,
-      this.wallet,
-      this.config,
-      'upgrade',
-      upgradeIndex,
-      0n,
-      0n,
-      (status) => {
-        this.txStatus = status;
-      },
-    );
+      if (this.txStatus === 'pending') {
+          return { success: false, error: 'Transaction already pending' };
+      }
+
+      this.txStatus = 'pending';
+      try {
+          const result = await purchaseOnChain(
+              this.wallet.provider,
+              this.wallet,
+              this.config,
+              'upgrade',
+              upgradeIndex,
+              0n,
+              0n,
+              (status) => {
+                  this.txStatus = status;
+              },
+          );
+          return result;
+      } catch (error: unknown) {
+          this.txStatus = 'error';
+          return { success: false, error: error instanceof Error ? error.message : 'Unknown transaction error' };
+      } finally {
+          if (this.txStatus === 'pending') {
+              this.txStatus = 'idle';
+          }
+      }
   }
 
   async buyExtraLife(): Promise<PurchaseResult> {
-    if (!this.wallet) {
-      return { success: false, error: 'Wallet not connected' };
-    }
+      if (!this.wallet) {
+          return { success: false, error: 'Wallet not connected' };
+      }
 
-    this.txStatus = 'pending';
-    return purchaseOnChain(
-      this.wallet.provider,
-      this.wallet,
-      this.config,
-      'life',
-      255,
-      1n,
-      0n,
-      (status) => {
-        this.txStatus = status;
-      },
-    );
+      if (this.txStatus === 'pending') {
+          return { success: false, error: 'Transaction already pending' };
+      }
+
+      this.txStatus = 'pending';
+      try {
+          const result = await purchaseOnChain(
+              this.wallet.provider,
+              this.wallet,
+              this.config,
+              'life',
+              255,
+              1n,
+              0n,
+              (status) => {
+                  this.txStatus = status;
+              },
+          );
+          return result;
+      } catch (error: unknown) {
+          this.txStatus = 'error';
+          return { success: false, error: error instanceof Error ? error.message : 'Unknown transaction error' };
+      } finally {
+          if (this.txStatus === 'pending') {
+              this.txStatus = 'idle';
+          }
+      }
   }
 
   async buyEnergy(): Promise<PurchaseResult> {
-    if (!this.wallet) {
-      return { success: false, error: 'Wallet not connected' };
-    }
+      if (!this.wallet) {
+          return { success: false, error: 'Wallet not connected' };
+      }
 
-    this.txStatus = 'pending';
-    return purchaseOnChain(
-      this.wallet.provider,
-      this.wallet,
-      this.config,
-      'energy',
-      255,
-      0n,
-      1n,
-      (status) => {
-        this.txStatus = status;
-      },
-    );
+      if (this.txStatus === 'pending') {
+          return { success: false, error: 'Transaction already pending' };
+      }
+
+      this.txStatus = 'pending';
+      try {
+          const result = await purchaseOnChain(
+              this.wallet.provider,
+              this.wallet,
+              this.config,
+              'energy',
+              255,
+              0n,
+              1n,
+              (status) => {
+                  this.txStatus = status;
+              },
+          );
+          return result;
+      } catch (error: unknown) {
+          this.txStatus = 'error';
+          return { success: false, error: error instanceof Error ? error.message : 'Unknown transaction error' };
+      } finally {
+          if (this.txStatus === 'pending') {
+              this.txStatus = 'idle';
+          }
+      }
   }
 
   getTxStatus(): TxStatus {

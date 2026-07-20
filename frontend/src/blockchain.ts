@@ -22,17 +22,24 @@ export function getConfig(): TowerArcherConfig {
     throw new Error('VITE_GAME_CONTRACT_ADDRESS is not set');
   }
 
+  if (!gameContractAddress || gameContractAddress === '0x0000000000000000000000000000000000000000') {
+      throw new Error('VITE_GAME_CONTRACT_ADDRESS must be set to a deployed contract address');
+  }
+
+  if (!ownerAddress || ownerAddress === '0x0000000000000000000000000000000000000000') {
+      throw new Error('VITE_OWNER_ADDRESS must be set');
+  }
+
   return {
-    chainId,
-    chainName: (import.meta as unknown as { env: Record<string, string | undefined> }).env
-      .VITE_ARC_CHAIN_NAME ?? 'Arc Testnet',
-    rpcUrl: (import.meta as unknown as { env: Record<string, string | undefined> }).env
-      .VITE_ARC_RPC_URL ?? 'https://rpc.testnet.arc.network',
-    usdcAddress: (import.meta as unknown as { env: Record<string, string | undefined> }).env
-      .VITE_USDC_ADDRESS ?? '0x3600000000000000000000000000000000000000',
-    gameContractAddress,
-    ownerAddress: (import.meta as unknown as { env: Record<string, string | undefined> }).env
-      .VITE_OWNER_ADDRESS ?? '0x0000000000000000000000000000000000000000',
+      chainId,
+      chainName: (import.meta as unknown as { env: Record<string, string | undefined> }).env
+          .VITE_ARC_CHAIN_NAME ?? 'Arc Testnet',
+      rpcUrl: (import.meta as unknown as { env: Record<string, string | undefined> }).env
+          .VITE_ARC_RPC_URL ?? 'https://rpc.testnet.arc.network',
+      usdcAddress: (import.meta as unknown as { env: Record<string, string | undefined> }).env
+          .VITE_USDC_ADDRESS ?? '0x3600000000000000000000000000000000000000',
+      gameContractAddress,
+      ownerAddress,
     blockExplorerUrl: 'https://testnet.arcscan.app',
   };
 }
