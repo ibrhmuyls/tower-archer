@@ -78,9 +78,45 @@ async function connectWallet(walletIndex = 0) {
         WALLET_STATE.connected = true;
         WALLET_STATE.address = address;
         WALLET_STATE.provider = targetProvider;
+        
+        // Switch to Arc Testnet after connection
+        const currentChainId = await targetProvider.request({ method: 'eth_chainId' }).catch(() => null);
+        const targetChainId = (typeof ARC_CONFIG !== 'undefined' && ARC_CONFIG.chainId) ? ARC_CONFIG.chainId : '0x4cef52';
+        
+        if (currentChainId && currentChainId.toLowerCase() !== targetChainId.toLowerCase()) {
+            try {
+                await targetProvider.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: targetChainId }],
+                });
+            } catch (switchError) {
+                const code = switchError?.code;
+                if (code === 4902 || code === -32603) {
+                    const rpcUrls = (typeof ARC_CONFIG !== 'undefined' && ARC_CONFIG.rpcUrls && ARC_CONFIG.rpcUrls[0]) ? ARC_CONFIG.rpcUrls : ['https://rpc.testnet.arc.network'];
+                    await targetProvider.request({
+                        method: 'wallet_addEthereumChain',
+                        params: [{
+                            chainId: targetChainId,
+                            chainName: (typeof ARC_CONFIG !== 'undefined' && ARC_CONFIG.chainName) ? ARC_CONFIG.chainName : 'Arc Testnet',
+                            rpcUrls,
+                            nativeCurrency: { name: 'USDC', symbol: 'USDC', decimals: 6 },
+                            blockExplorerUrls: (typeof ARC_CONFIG !== 'undefined' && ARC_CONFIG.blockExplorerUrls && ARC_CONFIG.blockExplorerUrls[0]) ? ARC_CONFIG.blockExplorerUrls : ['https://testnet.arcscan.app'],
+                        }],
+                    });
+                } else {
+                    throw switchError;
+                }
+            }
+        }
+        
         updateWalletUI();
         window.ui?.showNotification('Cüzdan bağlandı: ' + address.slice(0, 6) + '...' + address.slice(-4));
         if (window.game) window.game.updateUpgradeButtons();
+        
+        // Refresh balance after chain is set
+        if (typeof updateUSDCBalance === 'function') {
+            updateUSDCBalance(targetProvider);
+        }
     } catch (err) {
         console.error('Wallet connection failed:', err);
         if (err?.code === 4001) {
@@ -88,55 +124,19 @@ async function connectWallet(walletIndex = 0) {
         } else if (err?.message?.toLowerCase().includes('user rejected')) {
             window.ui?.showNotification('Bağlantı reddedildi', 3000);
         } else {
-            window.ui?.showNotification('Cüzdan bağlantısı başarısız', 4000);
+            window.ui?.showNotification('Cüzdan bağlantısı başarısız: ' + (err?.message || 'bilinmeyen hata'), 4000);
         }
     }
 }
 
 async function updateUSDCBalance(provider) {
     if (!provider || !WALLET_STATE.connected || !WALLET_STATE.address) return;
-    
-    const addr = WALLET_STATE.address;
-    if (typeof addr === 'string' && addr.startsWith('0x')) {
-        try {
-            const baseUrl = (typeof ARC_CONFIG !== 'undefined' && ARC_CONFIG.backend?.baseUrl) ? ARC_CONFIG.backend.baseUrl : 'http://localhost:3001';
-            const backendRes = await fetch(`${baseUrl}/api/sync`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ address: addr })
-            });
-            if (backendRes.ok) {
-                const backendData = await backendRes.json();
-                if (backendData && typeof backendData.available === 'number') {
-                    WALLET_STATE.usdcBalance = Math.max(0, backendData.available);
-                    updateWalletUI();
-                    return;
-                }
-            }
-        } catch (err) {
-            console.error('Backend sync failed:', err);
-        }
-    }
-    
-    try {
-        const code = await provider.request({
-            method: 'eth_getCode',
-            params: [ARC_CONFIG.contracts.usdc, 'latest']
-        });
-        if (!code || code === '0x') {
-            const raw = await provider.request({
-                method: 'eth_getBalance',
-                params: [WALLET_STATE.address, 'latest']
-            });
-            if (raw && raw !== '0x0') {
-                const rawNum = BigInt(raw);
-                WALLET_STATE.usdcBalance = Number(rawNum) / 1e6;
-                updateWalletUI();
-                return;
-            }
-        }
 
-        const addressHex = '0x' + WALLET_STATE.address.slice(2).padStart(64, '0');
+    const addr = WALLET_STATE.address;
+    if (typeof addr !== 'string' || !addr.startsWith('0x')) return;
+
+    try {
+        const addressHex = '0x' + addr.slice(2).padStart(64, '0');
         const abiEncoded = '0x70a08231' + addressHex.slice(2).padStart(64, '0');
         const result = await provider.request({
             method: 'eth_call',

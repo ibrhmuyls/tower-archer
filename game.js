@@ -578,70 +578,119 @@ class TowerArcherGame {
         this.speed = s;
     }
 
-    purchaseUpgrade(type) {
+    async purchaseUpgrade(type) {
+        if (!WALLET_STATE.connected || !WALLET_STATE.address || !WALLET_STATE.provider) {
+            window.ui.showNotification('Önce cüzdanı bağla.');
+            return false;
+        }
+
         const cfg = ARC_CONFIG.upgrades;
-        const upg = cfg[type];
-        if (!upg) return false;
+        const upgrade = cfg[type];
+        if (!upgrade) return false;
+
         const currentLevel = this.upgrades[type] || 0;
-        if (currentLevel >= upg.maxLevel) {
+        if (currentLevel >= upgrade.maxLevel) {
             window.ui.showNotification('Max level reached!');
             return false;
         }
-        const cost = upg.cost * (currentLevel + 1);
-        if (WALLET_STATE.usdcBalance < cost) {
+
+        const cost = upgrade.cost * (currentLevel + 1);
+        if (Number(WALLET_STATE.usdcBalance || 0) < cost) {
+            window.ui.showNotification('Yetersiz USDC');
             return false;
         }
 
-        this.recordUpgradeOnBackend(type, currentLevel + 1, cost);
-
-        WALLET_STATE.usdcBalance -= cost;
-        this.upgrades[type] = currentLevel + 1;
-
-        switch (upg.effect) {
-            case 'fireRate': this.fireRate += upg.value; break;
-            case 'damage': this.damage += upg.value; break;
-            case 'pierce': this.pierceCount = Math.min(5, this.pierceCount + upg.value); break;
-            case 'arrowCount': this.arrowCount += upg.value; break;
-            case 'lives':
-                this.lives = Math.min(ARC_CONFIG.gameplay.maxLives, this.lives + upg.value);
-                break;
-            case 'energy':
-                this.maxEnergy += upg.value;
-                this.energy = Math.min(this.energy + 1, this.maxEnergy);
-                break;
+        if (this._purchaseLocked) {
+            window.ui.showNotification('Önceki işlem bitmeden tekrar deneyin.');
+            return false;
         }
 
-        if (WALLET_STATE.provider) {
-            updateUSDCBalance(WALLET_STATE.provider);
-        }
-
-        updateWalletUI();
-        this.updateUpgradeButtons();
-        return true;
-    }
-
-    async recordUpgradeOnBackend(type, level, cost) {
-        if (!WALLET_STATE.address) return;
-
-        const baseUrl = (typeof ARC_CONFIG !== 'undefined' && ARC_CONFIG.backend?.baseUrl) ? ARC_CONFIG.backend.baseUrl : 'http://localhost:3001';
+        this._purchaseLocked = true;
+        window.ui.showNotification('İşlem onayı bekleniyor...');
 
         try {
-            const response = await fetch(`${baseUrl}/api/upgrade`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    address: WALLET_STATE.address,
-                    upgradeType: type,
-                    level: level,
-                    cost: cost
-                })
+            const indexMap = { speed: 0, power: 1, pierce: 2, multi: 3, extra_arrow: 4, energy: 5, life: 6 };
+            const upgradeIndex = indexMap[type];
+            const provider = WALLET_STATE.provider;
+            const player = WALLET_STATE.address;
+            const contract = ARC_CONFIG.contracts.gameContractAddress;
+            const usdc = ARC_CONFIG.contracts.usdc;
+
+            const pad = (v) => BigInt(v).toString(16).padStart(64, '0');
+            const costRaw = BigInt(cost) * 1000000n;
+
+            // 1) Allowance kontrolü
+            const allowData = '0xdd62ed3e' + player.slice(2).padStart(64, '0') + contract.slice(2).padStart(64, '0');
+            const allowRes = await provider.request({ method: 'eth_call', params: [{ to: usdc, data: allowData }, 'latest'] });
+            const allowance = BigInt(allowRes || '0x0');
+
+            // 2) Gerekirse approve
+            if (allowance < costRaw) {
+                window.ui.showNotification('USDC onayı gerekiyor...');
+                const approveData = '0x095ea7b3' + contract.slice(2).padStart(64, '0') + 'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+                await provider.request({
+                    method: 'eth_sendTransaction',
+                    params: [{ from: player, to: usdc, data: approveData }]
+                });
+                window.ui.showNotification('Onaylandı, satın alma gönderiliyor...');
+            }
+
+            // 3) buyUpgrade çağrısı (gerçek selector: 0x906c5aeb)
+            const buyData = '0x906c5aeb' + pad(upgradeIndex) + pad(0) + pad(0);
+            const txHash = await provider.request({
+                method: 'eth_sendTransaction',
+                params: [{ from: player, to: contract, data: buyData }]
             });
 
-            if (response.ok) {
-                console.log(`[BACKEND] Recorded upgrade: ${type} lvl${level} -${cost} USDC`);
+            if (!txHash) throw new Error('No tx hash');
+
+            window.ui.showNotification('İşlem gönderildi, onaylanıyor...');
+
+            // 4) TX onayı bekle
+            let receipt = null;
+            for (let i = 0; i < 30; i++) {
+                receipt = await provider.request({ method: 'eth_getTransactionReceipt', params: [txHash] });
+                if (receipt) break;
+                await new Promise(r => setTimeout(r, 2000));
             }
+
+            if (!receipt || (receipt.status && receipt.status !== '0x1')) {
+                throw new Error('İşlem onaylanmadı');
+            }
+
+            // 5) Sadece onay sonrası state güncelle
+            WALLET_STATE.usdcBalance = Math.max(0, Number(WALLET_STATE.usdcBalance || 0) - cost);
+            this.upgrades[type] = currentLevel + 1;
+
+            switch (upgrade.effect) {
+                case 'fireRate': this.fireRate += upgrade.value; break;
+                case 'damage': this.damage += upgrade.value; break;
+                case 'pierce': this.pierceCount = Math.min(5, this.pierceCount + upgrade.value); break;
+                case 'arrowCount': this.arrowCount += upgrade.value; break;
+                case 'lives':
+                    this.lives = Math.min(ARC_CONFIG.gameplay.maxLives, this.lives + upgrade.value);
+                    break;
+                case 'energy':
+                    this.maxEnergy += upgrade.value;
+                    this.energy = Math.min(this.energy + 1, this.maxEnergy);
+                    break;
+            }
+
+            updateUSDCBalance(provider);
+            updateWalletUI();
+            this.updateUpgradeButtons();
+            window.ui.showNotification('Satın alındı!');
+            return true;
         } catch (err) {
-            console.error('Failed to record upgrade on backend:', err);
+            const msg = (err && err.message) ? err.message : 'İşlem başarısız';
+            if (String(msg).includes('4001') || String(msg).toLowerCase().includes('user rejected')) {
+                window.ui.showNotification('İşlem reddedildi');
+            } else {
+                window.ui.showNotification('Hata: ' + msg.slice(0, 80));
+            }
+            return false;
+        } finally {
+            this._purchaseLocked = false;
         }
     }
 

@@ -1,46 +1,54 @@
 // Arc Testnet Configuration
+// Override these via window.TOWER_ARCHER_ENV before this script runs.
+window.TOWER_ARCHER_ENV = window.TOWER_ARCHER_ENV || {};
+
+const ENV = window.TOWER_ARCHER_ENV;
+
 window.ARC_CONFIG = {
-    chainId: '0x4D024E2', // 5042002 in hex
-    chainName: 'Arc Testnet',
+    chainId: ENV.chainId || '0x4cef52',
+    chainName: ENV.chainName || 'Arc Testnet',
     nativeCurrency: {
         name: 'USDC',
         symbol: 'USDC',
         decimals: 6,
-        address: '0x3600000000000000000000000000000000000000'
+        address: ENV.usdcAddress || '0x3600000000000000000000000000000000000000'
     },
-    rpcUrls: ['https://rpc.testnet.arc.network'],
-    blockExplorerUrls: ['https://testnet.arcscan.app'],
+    rpcUrls: ENV.rpcUrls ? (Array.isArray(ENV.rpcUrls) ? ENV.rpcUrls : [ENV.rpcUrls]) : ['https://rpc.testnet.arc.network'],
+    blockExplorerUrls: ENV.blockExplorerUrls ? (Array.isArray(ENV.blockExplorerUrls) ? ENV.blockExplorerUrls : [ENV.blockExplorerUrls]) : ['https://testnet.arcscan.app'],
     contracts: {
-        usdc: '0x3600000000000000000000000000000000000000',
-        treasury: '0x0000000000000000000000000000000000000000'
+        usdc: ENV.usdcAddress || '0x3600000000000000000000000000000000000000',
+        treasury: ENV.gameContractAddress || '0x5e64560d62AaE298381B19d39c1B48b759A278Fd',
+        gameContractAddress: ENV.gameContractAddress || '0x5e64560d62AaE298381B19d39c1B48b759A278Fd',
+        ownerAddress: ENV.ownerAddress || '0x0000000000000000000000000000000000000000'
     },
     backend: {
-        baseUrl: 'http://localhost:3001',
+        baseUrl: ENV.backendBaseUrl || '/api',
         upgradeEndpoint: '/api/upgrade',
-        balanceEndpoint: '/api/balance'
+        balanceEndpoint: '/api/balance',
+        syncEndpoint: '/api/sync'
     },
     // Gameplay constants
     gameplay: {
         baseArrowSpeed: 12,
-        baseFireRate: 400, // ms between shots
+        baseFireRate: 400,
         baseDamage: 1,
         baseLives: 5,
         maxLives: 10,
         baseArrowCount: 1,
         maxStage: 50,
-        baseStageTime: 90, // seconds per stage
+        baseStageTime: 90,
         minStageTime: 30,
-        stageTimeDecrease: 2, // seconds per stage
+        stageTimeDecrease: 2,
         baseEnemySpeed: 1.2,
-        enemySpeedIncrease: 0.08, // per stage
+        enemySpeedIncrease: 0.08,
         baseEnemyHp: 1,
-        enemyHpIncrease: 0.5, // per stage
-        baseEnemySpawnInterval: 1800, // ms
-        spawnIntervalDecrease: 40, // ms per stage
+        enemyHpIncrease: 0.5,
+        baseEnemySpawnInterval: 1800,
+        spawnIntervalDecrease: 40,
         minSpawnInterval: 350,
         scorePerEnemy: 10,
-        timeBonusMultiplier: 5, // seconds remaining * this
-        bonusDropChance: 0.15 // 15% for coin/arrow pickups
+        timeBonusMultiplier: 5,
+        bonusDropChance: 0.15
     },
     upgrades: {
         speed: { name: 'Faster Bow', cost: 5, effect: 'fireRate', value: -30, maxLevel: 5 },
@@ -75,6 +83,8 @@ window.WALLET_STATE = {
     connected: false,
     address: null,
     usdcBalance: 0,
+    allowance: 0,
     provider: null,
-    signer: null
+    signer: null,
+    chainId: null
 };
