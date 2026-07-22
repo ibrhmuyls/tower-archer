@@ -60,12 +60,12 @@ contract TowerArcher is Ownable, ReentrancyGuard, Pausable {
         require(_usdc != address(0), "Invalid USDC address");
         USDC = _usdc;
         
-        upgrades[0] = UpgradeConfig(5e5, 5, 5e5, true);  // Faster Bow
-        upgrades[1] = UpgradeConfig(10e5, 5, 10e5, true); // Power Arrows
-        upgrades[2] = UpgradeConfig(12e5, 3, 12e5, true); // Piercing
-        upgrades[3] = UpgradeConfig(15e5, 3, 15e5, true); // Multi Arrow
-        upgrades[4] = UpgradeConfig(8e5, 4, 8e5, true);   // Extra Arrow
-        upgrades[5] = UpgradeConfig(20e5, 3, 20e5, true); // Energy Charge
+        upgrades[0] = UpgradeConfig(1e4, 5, 1e4, true);  // Faster Bow    0.01 USDC
+        upgrades[1] = UpgradeConfig(1e4, 5, 1e4, true);  // Power Arrows  0.01 USDC
+        upgrades[2] = UpgradeConfig(2e4, 3, 2e4, true);  // Piercing      0.02 USDC
+        upgrades[3] = UpgradeConfig(2e4, 3, 2e4, true);  // Multi Arrow   0.02 USDC
+        upgrades[4] = UpgradeConfig(1e4, 4, 1e4, true);  // Extra Arrow   0.01 USDC
+        upgrades[5] = UpgradeConfig(2e4, 3, 2e4, true);  // Energy Charge 0.02 USDC
     }
 
     function getPlayer(address player) external view returns (PlayerState memory) {
@@ -118,8 +118,8 @@ contract TowerArcher is Ownable, ReentrancyGuard, Pausable {
         require(extraLivesAmount <= 5, "Too many lives");
         require(energyAmount <= 5, "Too much energy");
         
-        totalCost += extraLivesAmount * 8e5;
-        totalCost += energyAmount * 20e5;
+        totalCost += extraLivesAmount * 1e4;
+        totalCost += energyAmount * 1e4;
         
         require(totalCost > 0, "No purchase");
         

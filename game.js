@@ -617,7 +617,9 @@ class TowerArcherGame {
             const usdc = ARC_CONFIG.contracts.usdc;
 
             const pad = (v) => BigInt(v).toString(16).padStart(64, '0');
-            const costRaw = BigInt(cost) * 1000000n;
+            // cost may be fractional (e.g. 0.01 USDC). Convert to 6-decimal base units.
+            const costBase = BigInt(Math.round(Number(cost) * 1e6));
+            const costRaw = costBase;
 
             // 1) Allowance kontrolü
             const allowData = '0xdd62ed3e' + player.slice(2).padStart(64, '0') + contract.slice(2).padStart(64, '0');
