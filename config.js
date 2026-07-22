@@ -5,7 +5,7 @@ window.TOWER_ARCHER_ENV = window.TOWER_ARCHER_ENV || {};
 const ENV = window.TOWER_ARCHER_ENV;
 
 window.ARC_CONFIG = {
-    chainId: ENV.chainId || '0x4D024E2',
+    chainId: ENV.chainId || '0x4cef52',
     chainName: ENV.chainName || 'Arc Testnet',
     nativeCurrency: {
         name: 'USDC',
@@ -17,12 +17,12 @@ window.ARC_CONFIG = {
     blockExplorerUrls: ENV.blockExplorerUrls ? (Array.isArray(ENV.blockExplorerUrls) ? ENV.blockExplorerUrls : [ENV.blockExplorerUrls]) : ['https://testnet.arcscan.app'],
     contracts: {
         usdc: ENV.usdcAddress || '0x3600000000000000000000000000000000000000',
-        treasury: ENV.gameContractAddress || '0x0000000000000000000000000000000000000000',
-        gameContractAddress: ENV.gameContractAddress || '0x0000000000000000000000000000000000000000',
+        treasury: ENV.gameContractAddress || '0x5e64560d62AaE298381B19d39c1B48b759A278Fd',
+        gameContractAddress: ENV.gameContractAddress || '0x5e64560d62AaE298381B19d39c1B48b759A278Fd',
         ownerAddress: ENV.ownerAddress || '0x0000000000000000000000000000000000000000'
     },
     backend: {
-        baseUrl: ENV.backendBaseUrl || 'http://localhost:3001',
+        baseUrl: ENV.backendBaseUrl || '/api',
         upgradeEndpoint: '/api/upgrade',
         balanceEndpoint: '/api/balance',
         syncEndpoint: '/api/sync'

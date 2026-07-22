@@ -1,59 +1,53 @@
-# DEPLOYMENT.md
+# Tower Archer - Vercel Deployment (Arc Testnet)
 
-## Prerequisites
-- GitHub repository ready: `https://github.com/ibrhmuyls/tower-archer`
-- Vercel account linked to GitHub
-- Arc Testnet contract deployed address
-- Optional: Foundry or Hardhat for contract deployment
+Oyun zaten çalışır halde ve gerçek Arc Testnet kontratıyla bağlı.
+Tek yapman gereken: GitHub repo'yu Vercel'e import etmek.
 
-## Step 1 - Deploy TowerArcher.sol to Arc Testnet
+---
 
-### Option A: Foundry
-```bash
-cd contracts
-forge install OpenZeppelin/openzeppelin-contracts
-forge build
-forge script script/Deploy.s.sol:DeployScript --rpc-url https://rpc.testnet.arc.network --private-key $PRIVATE_KEY --broadcast --verify
-```
+## Canonical Arc Testnet Config (kodda sabit, değiştirme)
 
-### Option B: Hardhat
-```bash
-npm install --save-dev hardhat @nomicfoundation/hardhat-toolbox dotenv
-npx hardhat run scripts/deploy.ts --network arcTestnet
-```
+- Chain ID (hex):  `0x4cef52`
+- Chain ID (dec):   `5042002`
+- RPC:              `https://rpc.testnet.arc.network`
+- Explorer:         `https://testnet.arcscan.app`
+- USDC:             `0x3600000000000000000000000000000000000000`
+- Contract:         `0x5e64560d62AaE298381B19d39c1B48b759A278Fd`
 
-## Step 2 - Record contract and owner addresses
-After deployment, note:
-- Game contract address
-- Owner address used during deployment
+---
 
-## Step 3 - Connect Vercel to GitHub
-1. Open Vercel dashboard
-2. Import `ibrhmuyls/tower-archer`
-3. Framework preset: `Other`
-4. Build command: leave empty
-5. Output directory: `.` (root)
+## Vercel'e Deploy Adımları
 
-## Step 4 - Set Vercel environment variables
-Required variables:
-- `VITE_ARC_CHAIN_ID` = `0x4D024E2`
-- `VITE_ARC_CHAIN_NAME` = `Arc Testnet`
-- `VITE_ARC_RPC_URL` = `https://rpc.testnet.arc.network`
-- `VITE_USDC_ADDRESS` = `0x3600000000000000000000000000000000000000`
-- `VITE_GAME_CONTRACT_ADDRESS` = Paste deployed contract address
-- `VITE_OWNER_ADDRESS` = Paste owner address
-- `VITE_BACKEND_URL` = `/api`
+1. Tarayıcıda aç: https://vercel.com/new
+2. GitHub hesabınla giriş yap.
+3. `ibrhmuyls/tower-archer` repo'sunu bul ve **Import** et.
+4. Framework Preset: **Other** (veya Static)
+5. Build Command: boş bırak (statik site)
+6. Output Directory: boş bırak (kök dizin)
+7. Environment Variables ekle:
 
-## Step 5 - Deploy
-Trigger deploy from Vercel dashboard.
+   | Key | Value |
+   |-----|-------|
+   | VITE_ARC_CHAIN_ID | `0x4cef52` |
+   | VITE_ARC_CHAIN_NAME | `Arc Testnet` |
+   | VITE_ARC_RPC_URL | `https://rpc.testnet.arc.network` |
+   | VITE_USDC_ADDRESS | `0x3600000000000000000000000000000000000000` |
+   | VITE_GAME_CONTRACT_ADDRESS | `0x5e64560d62AaE298381B19d39c1B48b759A278Fd` |
 
-## Step 6 - Post-deploy verification
-1. Open deployed URL on HTTPS.
-2. Open browser console and confirm `ARC_CONFIG.contracts.gameContractAddress` is populated.
-3. Connect wallet and reject/approve chain switch prompt.
-4. Verify upgrade purchase shows wallet states via attached events.
+8. **Deploy** butonuna tıkla.
 
-## Notes
-- Contract must be deployed before first real purchase.
-- Vercel serverless `/api` routes require Vercel Pro for longer timeouts if syncing many addresses.
-- For production hardened behavior, follow DEPLOYMENT.md from canonical branch once consolidated.
+---
+
+## Başarı Kontrolü
+
+- Vercel `https://tower-archer-xxxx.vercel.app` adresi verir.
+- Site açılır, "Connect Wallet" butonu görünür.
+- Cüzdanı bağlayınca Arc Testnet'e geçer (değilse ekleme ister).
+- USDC bakiyesi blockchain'den okunur.
+- Upgrade butonuna basınca MetaMask onayı çıkar, ödeme yapılır.
+
+---
+
+## Sorun Olursa
+
+Hata mesajını aynen gönder. Private key istemez.
