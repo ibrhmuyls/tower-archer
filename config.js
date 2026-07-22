@@ -51,13 +51,13 @@ window.ARC_CONFIG = {
         bonusDropChance: 0.15
     },
     upgrades: {
-        speed: { name: 'Faster Bow', cost: 5, effect: 'fireRate', value: -30, maxLevel: 5 },
-        power: { name: 'Power Arrows', cost: 10, effect: 'damage', value: 1, maxLevel: 5 },
-        pierce: { name: 'Piercing Arrow', cost: 12, effect: 'pierce', value: 1, maxLevel: 3 },
-        multi: { name: 'Fire Arrows', cost: 15, effect: 'arrowCount', value: 1, maxLevel: 3 },
-        extra_arrow: { name: 'Extra Arrow', cost: 8, effect: 'arrowCount', value: 1, maxLevel: 4 },
-        energy: { name: 'Energy Charge', cost: 20, effect: 'energy', value: 1, maxLevel: 3 },
-        life: { name: 'Extra Life', cost: 8, effect: 'lives', value: 1, maxLevel: 5 }
+        speed: { name: 'Faster Bow', cost: 0.01, effect: 'fireRate', value: -30, maxLevel: 5 },
+        power: { name: 'Power Arrows', cost: 0.01, effect: 'damage', value: 1, maxLevel: 5 },
+        pierce: { name: 'Piercing Arrow', cost: 0.02, effect: 'pierce', value: 1, maxLevel: 3 },
+        multi: { name: 'Fire Arrows', cost: 0.02, effect: 'arrowCount', value: 1, maxLevel: 3 },
+        extra_arrow: { name: 'Extra Arrow', cost: 0.01, effect: 'arrowCount', value: 1, maxLevel: 4 },
+        energy: { name: 'Energy Charge', cost: 0.02, effect: 'energy', value: 1, maxLevel: 3 },
+        life: { name: 'Extra Life', cost: 0.01, effect: 'lives', value: 1, maxLevel: 5 }
     },
     enemyTypes: [
         { name: 'Scrap', hp: 1, speed: 1.0, score: 10, color: '#8B4513', size: 18, sprite: 'scrap' },
