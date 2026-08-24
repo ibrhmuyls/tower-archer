@@ -1,0 +1,13 @@
+# Build / dependency artifacts
+node_modules/
+dist/
+build/
+*.log
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Local env
+.env
+.env.local
